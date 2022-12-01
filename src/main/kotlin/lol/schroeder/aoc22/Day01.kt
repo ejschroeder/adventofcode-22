@@ -1,6 +1,6 @@
 package lol.schroeder.aoc22
 
-import lol.schroeder.aoc22.util.getResourceAsText
+import lol.schroeder.aoc22.util.readInputText
 
 fun part1(input: List<Long>) = input.max()
 
@@ -10,7 +10,7 @@ fun part2(input: List<Long>) = input
         .sum()
 
 fun main() {
-    val input = getResourceAsText("day01")
+    val input = readInputText("day01")
         .split("\n\n")
         .map { it.trim().split("\n").map(String::toLong) }
         .map { it.sum() }

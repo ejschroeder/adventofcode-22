@@ -1,6 +1,7 @@
 package lol.schroeder.aoc22
 
-import lol.schroeder.aoc22.util.readInputText
+import lol.schroeder.aoc22.util.readInputLines
+import lol.schroeder.aoc22.util.splitOn
 
 fun part1(input: List<Long>) = input.max()
 
@@ -10,10 +11,10 @@ fun part2(input: List<Long>) = input
         .sum()
 
 fun main() {
-    val input = readInputText("day01")
-        .split("\n\n")
-        .map { it.trim().split("\n").map(String::toLong) }
-        .map { it.sum() }
+    val input = readInputLines("day01")
+        .splitOn { it.isBlank() }
+        .map { it.sumOf(String::toLong) }
+        .toList()
 
     println("::: Day01 :::")
     println("Part 1: ${part1(input)}")

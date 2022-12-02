@@ -1,14 +1,16 @@
 package lol.schroeder.aoc22.util
 
-import java.net.URL
+import java.io.File
 
-fun readInputLines(path: String) = readInputText(path).split("\n")
+fun readInputLines(path: String) = getInputResourceAsFile(path).readLines()
 
-fun readInputText(path: String) = getResource(path).readText()
+fun readInputText(path: String) = getInputResourceAsFile(path).readText()
 
-fun getResource(path: String): URL {
-    return object {}.javaClass.getResource("/$path.txt")
+fun getInputResourceAsFile(path: String): File {
+    val uri = object {}.javaClass.getResource("/$path.txt")?.toURI()
         ?: throw ResourceNotFoundException(path)
+
+    return File(uri)
 }
 
 class ResourceNotFoundException(path: String) : RuntimeException("Resource '$path' not found.")

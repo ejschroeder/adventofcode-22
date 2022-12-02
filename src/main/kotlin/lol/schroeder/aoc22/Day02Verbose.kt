@@ -5,7 +5,6 @@ import lol.schroeder.aoc22.util.readInputLines
 fun main() {
     val input = readInputLines("day02")
         .map { it.split(" ") }
-        .dropLast(1)
 
     println("::: Day02 :::")
     println("Part 1: ${part1(input)}")

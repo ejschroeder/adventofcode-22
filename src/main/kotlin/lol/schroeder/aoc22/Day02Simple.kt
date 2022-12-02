@@ -12,7 +12,6 @@ const val SCISSORS = 3
 
 fun main() {
     val input = readInputLines("day02")
-        .dropLast(1)
 
     println("::: Day02 :::")
     println("Part 1: ${part1(input)}")

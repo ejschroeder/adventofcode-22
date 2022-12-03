@@ -3,14 +3,14 @@ package lol.schroeder.aoc22
 import lol.schroeder.aoc22.util.readInputLines
 import lol.schroeder.aoc22.util.splitOn
 
-fun part1(input: List<Long>) = input.maxOrNull()
+fun main() {
+    fun part1(input: List<Long>) = input.maxOrNull()
 
-fun part2(input: List<Long>) = input
+    fun part2(input: List<Long>) = input
         .sorted()
         .takeLast(3)
         .sum()
 
-fun main() {
     val input = readInputLines("day01")
         .splitOn { it.isBlank() }
         .map { it.sumOf(String::toLong) }

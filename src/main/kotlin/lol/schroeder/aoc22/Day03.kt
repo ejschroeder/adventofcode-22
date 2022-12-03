@@ -6,7 +6,7 @@ fun main() {
     fun Char.priorityScore() = if (isUpperCase()) code - 38 else code - 96
 
     fun findCommonItem(bags: List<String>) = bags.first()
-        .first { item -> bags.all { item in it } }
+        .first { item -> bags.drop(1).all { item in it } }
 
     fun part1(input: List<String>) = input
         .map { it.chunked(it.length / 2) }

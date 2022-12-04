@@ -5,8 +5,10 @@ import lol.schroeder.aoc22.util.readInputLines
 fun main() {
     fun Char.priorityScore() = if (isUpperCase()) code - 38 else code - 96
 
-    fun findCommonItem(bags: List<String>) = bags.first()
-        .first { item -> bags.drop(1).all { item in it } }
+    fun findCommonItem(bags: List<String>) = bags
+        .map { it.toSet() }
+        .reduce { acc, chars -> acc intersect chars }
+        .single()
 
     fun part1(input: List<String>) = input
         .map { it.chunked(it.length / 2) }

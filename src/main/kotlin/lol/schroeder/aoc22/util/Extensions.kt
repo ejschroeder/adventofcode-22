@@ -6,6 +6,9 @@ import java.security.MessageDigest
 fun Int.isEven() = this % 2 == 0
 fun Int.isOdd() = this % 2 == 1
 
+operator fun IntRange.contains(other: IntRange) = this.first <= other.first && this.last >= other.last
+fun IntRange.overlaps(other: IntRange) = first <= other.last && last >= other.first
+
 fun String.isUpperCase(): Boolean = this.all { it.isUpperCase() }
 fun String.md5(): String = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteArray())).toString(16)
 fun String.extractInts() = Regex("([+\\-])?\\d+")

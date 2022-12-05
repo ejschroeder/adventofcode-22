@@ -6,7 +6,7 @@ import java.security.MessageDigest
 fun Int.isEven() = this % 2 == 0
 fun Int.isOdd() = this % 2 == 1
 
-operator fun IntRange.contains(other: IntRange) = this.first <= other.first && this.last >= other.last
+operator fun IntRange.contains(other: IntRange) = first <= other.first && last >= other.last
 fun IntRange.overlaps(other: IntRange) = first <= other.last && last >= other.first
 
 fun String.isUpperCase(): Boolean = this.all { it.isUpperCase() }
@@ -15,6 +15,11 @@ fun String.extractInts() = Regex("([+\\-])?\\d+")
     .findAll(this)
     .mapNotNull { it.value.toIntOrNull() }
     .toList()
+
+fun String.hexToBinaryString() = map { it.hexToNibble() }.joinToString(separator = "")
+fun Char.hexToNibble() = digitToInt(radix = 16)
+    .toString(radix = 2)
+    .padStart(length = 4, padChar = '0')
 
 fun <T> String.mapGroups(pattern: String, transform: (MatchResult.Destructured) -> T) =
     mapGroups(Regex(pattern), transform)

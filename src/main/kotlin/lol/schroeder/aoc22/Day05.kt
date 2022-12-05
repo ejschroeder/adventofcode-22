@@ -5,39 +5,39 @@ import lol.schroeder.aoc22.util.*
 fun main() {
     data class Instruction(val amount: Int, val from: Int, val to: Int)
 
-    fun <E> moveIndividual(cargoStacks: List<ArrayDeque<E>>, instruction: Instruction) {
-        (0 until instruction.amount).forEach { _ ->
-            val cargo = cargoStacks[instruction.from].removeLast()
-            cargoStacks[instruction.to].add(cargo)
+    fun parseInstructions(instructions: List<String>) = instructions.map { it.extractInts() }
+        .map { Instruction(amount = it[0], from = it[1] - 1, to = it[2] - 1) }
+
+    fun parseLineToContainers(line: String) = line
+        .extractAll("[A-Z]|\\s{4}")
+        .map { if (it.isBlank()) null else it.first() }
+
+    fun addContainersToStack(stacks: List<ArrayDeque<Char>>, containers: List<Char?>): List<ArrayDeque<Char>> {
+        containers.forEachIndexed { idx, container ->
+            container?.let { stacks[idx].add(it) }
         }
+        return stacks
+    }
+
+    fun parseStacks(stacksInput: List<String>): List<ArrayDeque<Char>> {
+        val parsedStacks = stacksInput.dropLast(1)
+            .map(::parseLineToContainers)
+        val count = parsedStacks.first().size
+
+        return parsedStacks.reversed()
+            .fold(List(count) { ArrayDeque() }, ::addContainersToStack)
+    }
+
+    fun <E> moveIndividual(cargoStacks: List<ArrayDeque<E>>, instruction: Instruction) = repeat(instruction.amount) {
+        val cargo = cargoStacks[instruction.from].removeLast()
+        cargoStacks[instruction.to].add(cargo)
     }
 
     fun <E> moveStack(cargoStacks: List<ArrayDeque<E>>, instruction: Instruction) {
-        val removedCargo = (0 until instruction.amount).fold(mutableListOf<E>()) { acc, _ ->
-            acc.add(cargoStacks[instruction.from].removeLast())
-            acc
-        }
-
-        cargoStacks[instruction.to].addAll(removedCargo.reversed())
+        val removedCargo = cargoStacks[instruction.from].takeLast(instruction.amount)
+        repeat(instruction.amount) { cargoStacks[instruction.from].removeLast() }
+        cargoStacks[instruction.to].addAll(removedCargo)
     }
-
-    fun parseStacks(stacks: List<String>): List<ArrayDeque<Char>> {
-        val chunkedStacks = stacks.reversed()
-            .map { it.chunked(4) }
-        val count = chunkedStacks.first().size
-
-        return chunkedStacks.rest()
-            .map { chunkedLine -> chunkedLine.map { it[1] } }
-            .fold(List(count) { ArrayDeque<Char>() }) { acc, cargoLetters ->
-                cargoLetters.withIndex()
-                    .filter { it.value.isLetter() }
-                    .forEach { acc[it.index].add(it.value) }
-                acc
-            }
-    }
-
-    fun parseInstructions(instructions: List<String>) = instructions.map { it.extractInts() }
-            .map { Instruction(amount = it[0], from = it[1] - 1, to = it[2] - 1) }
 
     fun part1(input: List<List<String>>): String {
         val cargoStacks = parseStacks(input.first())

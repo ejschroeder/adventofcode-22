@@ -16,6 +16,11 @@ fun String.extractInts() = Regex("([+\\-])?\\d+")
     .mapNotNull { it.value.toIntOrNull() }
     .toList()
 
+fun String.extractAll(pattern: String) = Regex(pattern)
+    .findAll(this)
+    .map { it.value }
+    .toList()
+
 fun String.hexToBinaryString() = map { it.hexToNibble() }.joinToString(separator = "")
 fun Char.hexToNibble() = digitToInt(radix = 16)
     .toString(radix = 2)

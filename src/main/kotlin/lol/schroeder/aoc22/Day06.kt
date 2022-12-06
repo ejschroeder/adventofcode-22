@@ -3,10 +3,8 @@ package lol.schroeder.aoc22
 import lol.schroeder.aoc22.util.readInputLines
 
 fun main() {
-    fun String.findMarker(distinctCount: Int) = windowed(distinctCount, step = 1)
-            .withIndex()
-            .first { it.value.toSet().size == distinctCount }
-            .index + distinctCount
+    fun String.findMarker(distinctCount: Int) = windowed(distinctCount)
+            .indexOfFirst { it.toSet().count() == it.count() } + distinctCount
 
     fun part1(input: String) = input.findMarker(distinctCount = 4)
     fun part2(input: String) = input.findMarker(distinctCount = 14)

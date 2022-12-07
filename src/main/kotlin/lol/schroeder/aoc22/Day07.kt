@@ -2,82 +2,58 @@ package lol.schroeder.aoc22
 
 import lol.schroeder.aoc22.util.readInputLines
 
+
 fun main() {
-    abstract class Node(open val name: String, open var parent: Node?) {
-        abstract val size: Int
-    }
+    data class Filesystem(val workingDirectory: String = "", val directorySizes: Map<String, Int> = mapOf(workingDirectory to 0)) {
+        val totalSize: Int
+            get() = directorySizes.getOrElse("") { 0 }
 
-    data class Dir(override val name: String, val files: MutableList<Node>, override var parent: Node? = null): Node(name, parent) {
-        override val size: Int
-            get() = files.sumOf { it.size }
-    }
-    class File(override val name: String, override val size: Int, override var parent: Node? = null): Node(name, parent)
+        fun dive(directory: String): Filesystem {
+            val newWorkingDirectory = if (directory == "/") "" else "$workingDirectory/$directory"
+            return copy(workingDirectory = newWorkingDirectory, directorySizes = directorySizes + (newWorkingDirectory to 0))
+        }
 
-    fun countSmallDirectories(root: Dir): Int {
-        val rootSize = root.files.filterIsInstance<Dir>()
-            .map { it.size }
-            .filter { it <= 100000 }
-            .sum()
+        fun ascend() = when (workingDirectory) {
+            "/" -> this
+            else -> copy(workingDirectory = workingDirectory.substringBeforeLast("/"))
+        }
 
-        return rootSize + root.files.filterIsInstance<Dir>()
-            .map { countSmallDirectories(it) }
-            .sumOf { it }
-    }
-
-    fun exploreFileTree(input: List<String>): Dir {
-        val root = Dir("/", mutableListOf())
-        var location: Dir = root
-        for (line in input) {
-            val parts = line.split(" ")
-            if (parts[0].startsWith("$")) {
-                when (parts[1]) {
-                    "cd" -> {
-                        location = when (parts[2]) {
-                            "/" -> root
-                            ".." -> location.parent as Dir
-                            else -> location.files.firstOrNull { it.name == parts[2] } as Dir
-                        }
-                    }
-
-                    "ls" -> { // nothing, parsing output
-                    }
-                }
-                // command
-            } else {
-                when (parts.first()) {
-                    "dir" -> {
-                        val newDir = Dir(parts.last(), mutableListOf(), location)
-                        location.files.add(newDir)
-                    }
-
-                    else -> {
-                        val size = parts.first().toInt()
-                        location.files.add(File(parts.last(), size, location))
-                    }
+        fun addFile(size: Int): Filesystem {
+            val updatedSizes = directorySizes.mapValues {
+                when {
+                    workingDirectory.startsWith(it.key) -> it.value + size
+                    else -> it.value
                 }
             }
+            return copy(directorySizes = updatedSizes)
         }
-        return root
+    }
+
+    fun buildFilesystemFromInput(input: List<String>) = input.fold(Filesystem()) { fs, cmd ->
+        when {
+            cmd.startsWith("$ cd ..") -> fs.ascend()
+            cmd.startsWith("$ cd") -> fs.dive(cmd.substringAfterLast(" "))
+            cmd.startsWith("$ ls") -> fs
+            cmd.startsWith("dir") -> fs
+            else -> fs.addFile(cmd.substringBefore(" ").toInt())
+        }
     }
 
     fun part1(input: List<String>): Int {
-        val root = exploreFileTree(input)
-
-        return countSmallDirectories(root)
-    }
-
-    fun getAllDirectories(root: Dir): List<Dir> {
-        return root.files.filterIsInstance<Dir>().toList() + root.files.filterIsInstance<Dir>().flatMap { getAllDirectories(it) }
+        val fs = buildFilesystemFromInput(input)
+        return fs.directorySizes.filterValues { it <= 100000 }.values.sum()
     }
 
     fun part2(input: List<String>): Int {
-        val root = exploreFileTree(input)
+        val freeSpaceRequired = 30000000
+        val totalSpace = 70000000
 
-        val neededForDeletion = 30000000 - (70000000 - root.size)
-        return getAllDirectories(root)
-            .map { it.size }
-            .sorted()
-            .first { it > neededForDeletion }
+        val fs = buildFilesystemFromInput(input)
+        val used = fs.totalSize
+        val neededForDeletion = freeSpaceRequired - (totalSpace - used)
+        return fs.directorySizes
+            .filterValues { it >= neededForDeletion }
+            .minOf { it.value }
     }
 
     val input = readInputLines("day07")

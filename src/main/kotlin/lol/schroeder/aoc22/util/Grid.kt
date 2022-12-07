@@ -1,5 +1,6 @@
 package lol.schroeder.aoc22.util
 
+import java.util.function.BiPredicate
 import kotlin.math.abs
 
 enum class Direction {
@@ -10,6 +11,9 @@ enum class Direction {
             get() = listOf(NORTH, EAST, SOUTH, WEST)
     }
 }
+
+fun coordOf(x: Int, y: Int) = Coordinate(x, y)
+fun originCoord() = Coordinate.ORIGIN
 
 data class Coordinate(val x: Int, val y: Int) {
     companion object {
@@ -54,6 +58,8 @@ interface Grid<E> : Collection<E> {
     fun row(index: Int): List<E>
     fun columns(): List<List<E>>
     fun column(index: Int): List<E>
+    fun coordinateOfFirst(predicate: (E) -> Boolean): Coordinate?
+    fun coordinateOfLast(predicate: (E) -> Boolean): Coordinate?
     fun getNeighborCoordinates(coordinate: Coordinate, includeDiagonals: Boolean = false, wrap: Boolean = false): List<Coordinate>
     fun getNeighborValues(coordinate: Coordinate, includeDiagonals: Boolean = false, wrap: Boolean = false): List<E>
 }
@@ -81,6 +87,12 @@ class MutableListGrid<E> private constructor(private val elements: MutableList<E
     override operator fun set(coordinate: Coordinate, element: E) = elements.set(indexOf(coordinate), element)
 
     override operator fun set(x: Int, y: Int, element: E) = elements.set(indexOf(x, y), element)
+
+    override fun coordinateOfFirst(predicate: (E) -> Boolean) = indexOfFirst(predicate)
+        .takeUnless { it < 0 }?.let { coordinateOf(it) }
+    override fun coordinateOfLast(predicate: (E) -> Boolean) = indexOfLast(predicate)
+        .takeUnless { it < 0 }?.let { coordinateOf(it) }
+
 
     override fun getNeighborCoordinates(coordinate: Coordinate, includeDiagonals: Boolean, wrap: Boolean): List<Coordinate> {
         require(contains(coordinate)) { "Coordinate $coordinate is out of bounds for ${width}x${height} grid" }

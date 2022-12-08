@@ -50,6 +50,7 @@ interface Grid<E> : Collection<E> {
     val height: Int
     val xIndices: IntRange
     val yIndices: IntRange
+    val coordinates: Iterable<Coordinate>
 
     operator fun contains(coordinate: Coordinate): Boolean
     operator fun get(coordinate: Coordinate): E
@@ -62,6 +63,12 @@ interface Grid<E> : Collection<E> {
     fun coordinateOfLast(predicate: (E) -> Boolean): Coordinate?
     fun getNeighborCoordinates(coordinate: Coordinate, includeDiagonals: Boolean = false, wrap: Boolean = false): List<Coordinate>
     fun getNeighborValues(coordinate: Coordinate, includeDiagonals: Boolean = false, wrap: Boolean = false): List<E>
+
+    fun indexOf(x: Int, y: Int) = y * width + x
+
+    fun indexOf(coordinate: Coordinate) = indexOf(coordinate.x, coordinate.y)
+
+    fun coordinateOf(index: Int) = Coordinate.fromIndex(index, width)
 }
 
 interface MutableGrid<E> : Grid<E> {
@@ -77,6 +84,8 @@ class MutableListGrid<E> private constructor(private val elements: MutableList<E
     override val height get() = size / width
     override val xIndices = 0 until width
     override val yIndices get() = 0 until height
+    override val coordinates get() = elements.indices.map { coordinateOf(it) }
+
 
     override operator fun contains(coordinate: Coordinate) = coordinate.x in xIndices && coordinate.y in yIndices
 
@@ -115,12 +124,6 @@ class MutableListGrid<E> private constructor(private val elements: MutableList<E
     override fun column(index: Int) = List(height) { idx -> elements.get(index + idx * width) }
 
     override fun toString() = rows().map { it.joinToString(" ") }.joinToString("\n")
-
-    fun indexOf(x: Int, y: Int) = y * width + x
-
-    fun indexOf(coordinate: Coordinate) = indexOf(coordinate.x, coordinate.y)
-
-    fun coordinateOf(index: Int) = Coordinate.fromIndex(index, width)
 }
 
 fun <T> Iterable<T>.toGrid(width: Int): Grid<T> = MutableListGrid(this, width)

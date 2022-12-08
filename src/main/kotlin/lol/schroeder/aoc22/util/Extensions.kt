@@ -38,6 +38,16 @@ fun <T> String.mapGroups(regex: Regex, transform: (MatchResult.Destructured) -> 
 
 fun <T> Iterable<T>.rest() = drop(1)
 
+fun <T> Iterable<T>.takeWhileInclusive(predicate: (T) -> Boolean) = sequence {
+    with(iterator()) {
+        while (hasNext()) {
+            val next = next()
+            yield(next)
+            if (!predicate(next)) break
+        }
+    }
+}
+
 fun <K, V, T> Map<K, V>.merge(other: Map<K, V>, valueMapper: (List<V>) -> T): Map<K, T> {
     return (this.asSequence() + other.asSequence())
         .groupBy({ it.key }, { it.value })

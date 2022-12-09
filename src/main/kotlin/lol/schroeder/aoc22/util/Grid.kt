@@ -63,11 +63,8 @@ interface Grid<E> : Collection<E> {
     fun coordinateOfLast(predicate: (E) -> Boolean): Coordinate?
     fun getNeighborCoordinates(coordinate: Coordinate, includeDiagonals: Boolean = false, wrap: Boolean = false): List<Coordinate>
     fun getNeighborValues(coordinate: Coordinate, includeDiagonals: Boolean = false, wrap: Boolean = false): List<E>
-
     fun indexOf(x: Int, y: Int) = y * width + x
-
     fun indexOf(coordinate: Coordinate) = indexOf(coordinate.x, coordinate.y)
-
     fun coordinateOf(index: Int) = Coordinate.fromIndex(index, width)
 }
 
@@ -102,7 +99,6 @@ class MutableListGrid<E> private constructor(private val elements: MutableList<E
     override fun coordinateOfLast(predicate: (E) -> Boolean) = indexOfLast(predicate)
         .takeUnless { it < 0 }?.let { coordinateOf(it) }
 
-
     override fun getNeighborCoordinates(coordinate: Coordinate, includeDiagonals: Boolean, wrap: Boolean): List<Coordinate> {
         require(contains(coordinate)) { "Coordinate $coordinate is out of bounds for ${width}x${height} grid" }
 
@@ -119,11 +115,11 @@ class MutableListGrid<E> private constructor(private val elements: MutableList<E
 
     override fun row(index: Int) = elements.subList(index * width, index * width + width)
 
-    override fun columns() = xIndices.map { col -> List(height) { idx -> elements.get(col + idx * width) } }
+    override fun columns() = xIndices.map { col -> List(height) { idx -> elements[col + idx * width] } }
 
-    override fun column(index: Int) = List(height) { idx -> elements.get(index + idx * width) }
+    override fun column(index: Int) = List(height) { idx -> elements[index + idx * width] }
 
-    override fun toString() = rows().map { it.joinToString(" ") }.joinToString("\n")
+    override fun toString() = rows().joinToString("\n") { it.joinToString(" ") }
 }
 
 fun <T> Iterable<T>.toGrid(width: Int): Grid<T> = MutableListGrid(this, width)

@@ -1,6 +1,5 @@
 package lol.schroeder.aoc22.util
 
-import java.util.function.BiPredicate
 import kotlin.math.abs
 
 enum class Direction {
@@ -39,8 +38,6 @@ data class Coordinate(val x: Int, val y: Int) {
     }
 
     fun getManhattanDistance(from: Coordinate = ORIGIN) = abs(x - from.x) + abs(y - from.y)
-
-    fun toIndex(width: Int) = y * width + x
 
     override fun toString() = "($x, $y)"
 }

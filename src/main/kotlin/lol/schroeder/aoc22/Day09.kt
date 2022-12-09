@@ -1,113 +1,75 @@
 package lol.schroeder.aoc22
 
 import lol.schroeder.aoc22.util.*
-import kotlin.math.abs
+import kotlin.math.sign
 
 fun main() {
+    operator fun Coordinate.minus(other: Coordinate): Coordinate = coordOf(x - other.x, y - other.y)
 
-    fun part1(input: List<String>) {
-        val instructions = input.map { it.split(" ") }
-            .map { it[0] to it[1].toInt() }
-
-        var headLoc = originCoord()
-        var tailLoc = originCoord()
-
-        val visitedCoordinates = mutableSetOf(tailLoc)
-
-        for ((dir, amount) in instructions) {
-            val direction = when (dir) {
-                "R" -> Direction.EAST
-                "L" -> Direction.WEST
-                "U" -> Direction.NORTH
-                "D" -> Direction.SOUTH
-                else -> throw RuntimeException()
-            }
-
-            repeat(amount) {
-                headLoc = headLoc.move(direction)
-
-                when (direction) {
-                    Direction.NORTH -> { if (headLoc.y - tailLoc.y > 1) tailLoc = headLoc.copy(x = headLoc.x, y = headLoc.y - 1) }
-                    Direction.EAST -> { if (headLoc.x - tailLoc.x > 1) tailLoc = headLoc.copy(x = headLoc.x - 1, y = headLoc.y) }
-                    Direction.SOUTH -> { if (tailLoc.y - headLoc.y > 1) tailLoc = headLoc.copy(x = headLoc.x, y = headLoc.y + 1) }
-                    Direction.WEST -> { if (tailLoc.x - headLoc.x > 1) tailLoc = headLoc.copy(x = headLoc.x + 1, y = headLoc.y) }
-                    else -> {}
-                }
-                visitedCoordinates.add(tailLoc)
-            }
-        }
-
-        println(visitedCoordinates.size)
+    fun directionFor(dir: String) = when (dir) {
+        "U" -> Direction.NORTH
+        "R" -> Direction.EAST
+        "D" -> Direction.SOUTH
+        "L" -> Direction.WEST
+        else -> throw RuntimeException("Unknown direction '$dir' in instruction!")
     }
 
-    fun part2(input: List<String>) {
-        val instructions = input.map { it.split(" ") }
-            .map { it[0] to it[1].toInt() }
+    fun parseInstructions(instructions: List<String>) = instructions
+        .map { it.split(" ") }
+        .map { it[0] to it[1].toInt() }
+        .flatMap { instruction -> List(instruction.second) { directionFor(instruction.first) } }
 
-        operator fun Coordinate.minus(other: Coordinate): Coordinate {
-            return coordOf(x - other.x, y - other.y)
-        }
-
-        val knotPositions = MutableList(10) { originCoord() }
-
-        val visitedCoordinates = mutableSetOf(knotPositions.last())
-
-        for ((dir, amount) in instructions) {
-            val direction = when (dir) {
-                "R" -> Direction.EAST
-                "L" -> Direction.WEST
-                "U" -> Direction.NORTH
-                "D" -> Direction.SOUTH
-                else -> throw RuntimeException()
-            }
-
-            repeat(amount) {
-                knotPositions[0] = knotPositions[0].move(direction)
-
-                for (i in 1..knotPositions.lastIndex) {
-                    val headLoc = knotPositions[i - 1]
-                    val tailLoc = knotPositions[i]
-
-                    val xDist = headLoc.x - tailLoc.x
-                    val yDist = headLoc.y - tailLoc.y
-
-                    if (abs(xDist) > 1 && abs(xDist) > abs(yDist)) {
-                        val offset = if (xDist < 0) xDist + 1 else xDist - 1
-                        knotPositions[i] = tailLoc.copy(x = tailLoc.x + offset, y = headLoc.y)
-                    } else if (abs(yDist) > 1 && abs(yDist) > abs(xDist)) {
-                        val offset = if (yDist < 0) yDist + 1 else yDist - 1
-                        knotPositions[i] = tailLoc.copy(x = headLoc.x, y = tailLoc.y + offset)
-                    } else if (abs(xDist) > 1 && abs(xDist) == abs(yDist)) {
-                        val yOffset = if (yDist < 0) yDist + 1 else yDist - 1
-                        val xOffset = if (xDist < 0) xDist + 1 else xDist - 1
-                        knotPositions[i] = tailLoc.copy(x = tailLoc.x + xOffset, y = tailLoc.y + yOffset)
-                    }
-
-                    if (i == knotPositions.lastIndex)
-                        visitedCoordinates.add(knotPositions.last())
-                }
-            }
-
-        }
-
-        println(visitedCoordinates.size)
+    fun Coordinate.isNeighborOf(other: Coordinate): Boolean {
+        return other.x - 1 <= x && x <= other.x + 1 && other.y - 1 <= y && y <= other.y + 1
     }
 
-    val testInput = """
-        R 5
-        U 8
-        L 8
-        D 3
-        R 17
-        D 10
-        L 25
-        U 20
-    """.trimIndent().split("\n")
-    println("Test: ${part2(testInput)}")
+    data class Rope(val knots: List<Coordinate>) {
+        constructor(size: Int): this(List(size) { originCoord() })
+
+        init { require(knots.size > 1) { "Must have more than one knot in the rope!" } }
+
+        val tail: Coordinate
+            get() = knots.first()
+
+        fun move(direction: Direction) = Rope(knots = move(knots.first(), knots.rest(), direction))
+
+        private fun move(knot: Coordinate, head: List<Coordinate>, direction: Direction): List<Coordinate> {
+            if (head.isEmpty())
+                return listOf(knot.move(direction))
+
+            val updatedHead = move(head.first(), head.rest(), direction)
+
+            val parentKnot = updatedHead.first()
+            if (knot.isNeighborOf(parentKnot))
+                return listOf(knot) + updatedHead
+
+            val (dx, dy) = parentKnot - knot
+            val newKnotPosition = coordOf(knot.x + dx.sign, knot.y + dy.sign)
+            return listOf(newKnotPosition) + updatedHead
+        }
+    }
+
+    fun getVisitedTailLocations(rope: Rope, instructions: List<Direction>) = instructions
+        .fold(rope to setOf<Coordinate>()) { acc, direction ->
+            val (r, visited) = acc
+            val newRope = r.move(direction)
+            val newVisited = visited + newRope.tail
+            newRope to newVisited
+        }.second
+
+
+    fun part1(input: List<String>): Int {
+        val instructions = parseInstructions(input)
+        return getVisitedTailLocations(Rope(2), instructions).size
+    }
+
+    fun part2(input: List<String>): Int {
+        val instructions = parseInstructions(input)
+        return getVisitedTailLocations(Rope(10), instructions).size
+    }
 
     val input = readInputLines("day09")
     println("::: Day09 :::")
     println("Part 1: ${part1(input)}")
     println("Part 2: ${part2(input)}")
 }
-

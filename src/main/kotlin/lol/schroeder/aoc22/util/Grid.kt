@@ -73,7 +73,7 @@ interface MutableGrid<E> : Grid<E> {
 class MutableListGrid<E> private constructor(private val elements: MutableList<E>, override val width: Int): MutableGrid<E>, Collection<E> by elements {
     constructor(elements: Iterable<E>, width: Int): this(elements.toMutableList(), width)
 
-    init { require(width * height == size) }
+    init { require(width * height == size) { "Width does not match size: $width * $height != $size" } }
 
     override val height get() = size / width
     override val xIndices = 0 until width

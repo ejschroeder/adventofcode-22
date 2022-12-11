@@ -1,11 +1,8 @@
 package lol.schroeder.aoc22
 
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentSetOf
 import lol.schroeder.aoc22.util.*
 import kotlin.math.sign
-import kotlin.system.measureNanoTime
 
 fun main() {
     operator fun Coordinate.minus(other: Coordinate): Coordinate = coordOf(x - other.x, y - other.y)
@@ -59,7 +56,6 @@ fun main() {
             val newRope = r.move(direction)
             newRope to visited.add(newRope.tail)
         }.second
-
 
     fun part1(input: List<String>): Int {
         val instructions = parseInstructions(input)

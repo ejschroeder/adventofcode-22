@@ -10,6 +10,7 @@ operator fun IntRange.contains(other: IntRange) = first <= other.first && last >
 fun IntRange.overlaps(other: IntRange) = first <= other.last && last >= other.first
 
 fun String.isUpperCase(): Boolean = this.all { it.isUpperCase() }
+fun String.splitAtIndex(index: Int) = substring(0, index) to substring(index)
 fun String.isNumeric(): Boolean = this.all { it.isDigit() }
 fun String.md5(): String = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteArray())).toString(16)
 fun String.extractInts() = Regex("([+\\-])?\\d+")

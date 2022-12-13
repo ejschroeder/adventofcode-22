@@ -8,17 +8,18 @@ import lol.schroeder.aoc22.util.splitOn
 sealed interface PacketData : Comparable<PacketData>
 data class LiteralData(val value: Int): PacketData {
     override fun compareTo(other: PacketData) = when (other) {
-        is LiteralData -> value.compareTo(other.value)
-        is ListData -> this.toListData().compareTo(other)
+        is LiteralData -> value compareTo other.value
+        is ListData -> toListData() compareTo other
     }
     fun toListData() = ListData(listOf(this))
 }
 
 data class ListData(val value: List<PacketData>): PacketData {
     override fun compareTo(other: PacketData): Int = when (other) {
-        is LiteralData -> compareTo(other.toListData())
-        is ListData -> value.zip(other.value).map { it.first.compareTo(it.second) }
-                .firstOrNull { it != 0 } ?: value.size.compareTo(other.value.size)
+        is LiteralData -> this compareTo other.toListData()
+        is ListData -> value.zip(other.value)
+            .map { it.first compareTo it.second }
+            .firstOrNull { it != 0 } ?: (value.size compareTo other.value.size)
     }
 }
 
@@ -60,7 +61,7 @@ class PacketParser {
                 else -> acc
             } }
             .indexOf(0)
-            .takeUnless { it == -1 } ?: throw RuntimeException("No closing brace found for ''")
+            .takeUnless { it == -1 } ?: throw RuntimeException("No matching closing brace found for '$string'")
     }
 }
 
@@ -84,9 +85,7 @@ fun main() {
         val dividerPackets = listOf("[[2]]", "[[6]]")
             .map { parser.parsePacket(it) }
 
-        val packets = input
-            .filter { it.isNotBlank() }
-            .map { parser.parsePacket(it) } + dividerPackets
+        val packets = dividerPackets + input.filter { it.isNotBlank() }.map { parser.parsePacket(it) }
 
         return packets.asSequence()
             .sorted()

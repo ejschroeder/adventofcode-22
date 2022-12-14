@@ -1,6 +1,9 @@
 package lol.schroeder.aoc22.util
 
 import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.sign
 
 enum class Direction {
     NORTH, NORTH_EAST, EAST, SOUTH_EAST, SOUTH, SOUTH_WEST, WEST, NORTH_WEST;
@@ -35,6 +38,29 @@ data class Coordinate(val x: Int, val y: Int) {
         Direction.SOUTH_WEST -> copy(x = x - distance, y = y - distance)
         Direction.WEST -> copy(x = x - distance)
         Direction.NORTH_WEST -> copy(x = x - distance, y = y + distance)
+    }
+
+    infix fun lineTo(other: Coordinate): List<Coordinate> {
+        val diff = Coordinate(other.x - x, other.y - y)
+
+        if (diff.x == 0) {
+            return IntProgression.fromClosedRange(y, other.y, diff.y.sign)
+                .map { coordOf(x, it) }
+        }
+
+        if (diff.y == 0) {
+            return IntProgression.fromClosedRange(x, other.x, diff.x.sign)
+                .map { coordOf(it, y) }
+        }
+
+        val xCoords = IntProgression.fromClosedRange(x, other.x, diff.x.sign).toList()
+        val yCoords = IntProgression.fromClosedRange(y, other.y, diff.y.sign).toList()
+
+        if (xCoords.size != yCoords.size) {
+            throw RuntimeException("Cannot build line that does not follow one of 8 main compass directions")
+        }
+
+        return xCoords.zip(yCoords).map { coordOf(it.first, it.second) }
     }
 
     fun getManhattanDistance(from: Coordinate = ORIGIN) = abs(x - from.x) + abs(y - from.y)

@@ -2,12 +2,19 @@ package lol.schroeder.aoc22.util
 
 import java.math.BigInteger
 import java.security.MessageDigest
+import kotlin.math.max
+import kotlin.math.min
 
 fun Int.isEven() = this % 2 == 0
 fun Int.isOdd() = this % 2 == 1
 
 operator fun IntRange.contains(other: IntRange) = first <= other.first && last >= other.last
-fun IntRange.overlaps(other: IntRange) = first <= other.last && last >= other.first
+infix fun IntRange.overlaps(other: IntRange) = first <= other.last && last >= other.first
+fun IntRange.merge(other: IntRange): IntRange? {
+    val min = min(this.first, other.first)
+    val max = max(this.last, other.last)
+    return (min..max).takeIf { overlaps(other) }
+}
 
 fun String.isUpperCase(): Boolean = this.all { it.isUpperCase() }
 fun String.splitAtIndex(index: Int) = substring(0, index) to substring(index)

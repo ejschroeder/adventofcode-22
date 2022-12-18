@@ -46,6 +46,23 @@ fun <T> String.mapGroups(regex: Regex, transform: (MatchResult.Destructured) -> 
 
 fun <T> Iterable<T>.rest() = drop(1)
 
+fun <T, R : Comparable<R>> Iterable<T>.minMaxOf(selector: (T) -> R): Pair<R, R> {
+    val iter = iterator()
+    if (!iter.hasNext()) throw NoSuchElementException()
+
+    val next = iter.next()
+    var min = selector(next)
+    var max = selector(next)
+
+    iter.forEachRemaining {
+        val item = selector(it)
+        if (item < min) min = item
+        if (item > max) max = item
+    }
+
+    return min to max
+}
+
 fun <T> Iterable<T>.takeWhileInclusive(predicate: (T) -> Boolean) = sequence {
     with(iterator()) {
         while (hasNext()) {

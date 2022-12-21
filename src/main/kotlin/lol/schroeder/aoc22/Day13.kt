@@ -45,7 +45,7 @@ class PacketParser {
         } else {
             val literal = remainingPacket.substringBefore(",")
             val packet = LiteralData(literal.toInt())
-            val remaining = if (remainingPacket.contains(",")) remainingPacket.substringAfter(",") else ""
+            val remaining = remainingPacket.substringAfter(",", "")
             parseRest(parsed + packet, remaining)
         }
     }
@@ -70,8 +70,7 @@ fun main() {
         val parser = PacketParser()
 
         val pairs = input.splitOn { it.isBlank() }
-            .map { it.first() to it.last() }
-            .map { parser.parsePacket(it.first) to parser.parsePacket(it.second) }
+            .map { parser.parsePacket(it.first()) to parser.parsePacket(it.last()) }
 
         return pairs.map { (left, right) -> left <= right }
             .withIndex()

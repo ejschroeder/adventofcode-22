@@ -1,8 +1,6 @@
 package lol.schroeder.aoc22.util
 
 import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.min
 import kotlin.math.sign
 
 enum class Direction {

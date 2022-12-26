@@ -8,6 +8,19 @@ import kotlin.math.min
 fun Int.isEven() = this % 2 == 0
 fun Int.isOdd() = this % 2 == 1
 
+tailrec fun gcd(a: Int, b: Int): Int {
+    if (b == 0) return a
+    return gcd(b, a.mod(b))
+}
+
+fun gcd(a: Int, b: Int, vararg others: Int): Int {
+    return others.fold(gcd(a, b)) { acc, i -> gcd(acc, i) }
+}
+
+fun lcm(a: Int, b: Int): Int {
+    return a / gcd(a, b) * b
+}
+
 operator fun IntRange.contains(other: IntRange) = first <= other.first && last >= other.last
 infix fun IntRange.overlaps(other: IntRange) = first <= other.last && last >= other.first
 fun IntRange.merge(other: IntRange): IntRange? {

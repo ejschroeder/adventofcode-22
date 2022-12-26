@@ -3,6 +3,13 @@ package lol.schroeder.aoc22.util
 import kotlin.math.abs
 import kotlin.math.sign
 
+data class Bounds2D(val endX: Int, val endY: Int, val startX: Int = 0, val startY: Int = 0) {
+    val xBounds = startX..endX
+    val yBounds = startY..endY
+
+    operator fun contains(coordinate: Coordinate) = coordinate.x in xBounds && coordinate.y in yBounds
+}
+
 enum class Direction {
     NORTH, NORTH_EAST, EAST, SOUTH_EAST, SOUTH, SOUTH_WEST, WEST, NORTH_WEST;
 

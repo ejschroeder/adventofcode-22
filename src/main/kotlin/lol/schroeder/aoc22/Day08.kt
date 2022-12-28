@@ -21,7 +21,7 @@ fun main() {
         return listOf(above(coordinate), below(coordinate), left(coordinate), right(coordinate))
             .map { trees -> trees.takeWhileInclusive { it < tree } }
             .map { it.count() }
-            .reduce(Int::times)
+            .product()
     }
 
     fun part1(input: List<String>): Int {

@@ -1,5 +1,6 @@
 package lol.schroeder.aoc22
 
+import lol.schroeder.aoc22.util.product
 import lol.schroeder.aoc22.util.readInputLines
 import lol.schroeder.aoc22.util.splitAtIndex
 import lol.schroeder.aoc22.util.splitOn
@@ -91,7 +92,7 @@ fun main() {
             .withIndex()
             .filter { it.value in dividerPackets }
             .map { it.index + 1 }
-            .reduce(Int::times)
+            .product()
     }
 
     val input = readInputLines("day13")

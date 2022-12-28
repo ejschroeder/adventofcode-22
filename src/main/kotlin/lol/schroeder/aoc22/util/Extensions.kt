@@ -59,6 +59,11 @@ fun <T> String.mapGroups(regex: Regex, transform: (MatchResult.Destructured) -> 
 
 fun <T> Iterable<T>.rest() = drop(1)
 
+fun Iterable<Long>.product() = reduce(Long::times)
+fun Iterable<Int>.product() = reduce(Int::times)
+fun Sequence<Int>.product() = reduce(Int::times)
+fun Sequence<Long>.product() = reduce(Long::times)
+
 fun <T, R : Comparable<R>> Iterable<T>.minMaxOf(selector: (T) -> R): Pair<R, R> {
     val iter = iterator()
     if (!iter.hasNext()) throw NoSuchElementException()
